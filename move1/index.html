@@ -26,12 +26,10 @@ body {
 
 #content {
   background-color: #3498db36;
-  width: 90%;
-  height: 80%;
-  margin-left: 4%;
-  margin-top: 2%;
-  margin-bottom:1%;
   box-shadow: 0 0 10px 0 #3498db inset, 0 0 10px 4px #3498db;
+  max-width: 90%;
+  max-height: 90%;
+  
 }
 
 #copy {
@@ -53,8 +51,8 @@ button {
 .btn {
   box-sizing: border-box;
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   background-color: transparent;
   border: 2px solid #e74c3c;
   border-radius: 0.6em;
@@ -66,7 +64,7 @@ button {
   line-height: 1;
   margin: 10px;
   padding: 5px 30px;
-  height: 50px;
+  height: 40px;
   text-decoration: none;
   text-align: center;
   text-transform: uppercase;
@@ -109,19 +107,30 @@ h1 {
   width: 90%;
 }
 
+#media {
+  margin:auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding : 2px;
+  max-height: 90%;
+  height: 80%;
+}
+
 </style>
 
 </head>
 <body>
 <h1> Am I AI 1: We ourselves are art</h1>
 <div id="container">
-    <canvas id="content">
-    </canvas>
-    <canvas id="copy">
-    </canvas>
+    <div id="media">
+      <canvas id="content"></canvas>
+    </div>
+    <canvas id="copy"></canvas>
     <video id="camera" autoplay="" muted=""> </video>
+
     <div id="controls">
-     <input type="range" min="0" max="4" value="0" id="resolution" onchange="updateResolution()"><br>
+     <input type="range" min="0" max="5" value="0" id="resolution" onchange="updateResolution()"><br>
      <input type="file" id="fileupload" style="display: none" accept="image/*"/>
      <div id="buttons">
        <button class="btn animate" onclick="startVideo()">Start</button>
@@ -133,11 +142,18 @@ h1 {
 </body>
 
 <script>
+var canvas = document.getElementById('content');
+canvas.style.width = "90%";
+canvas.style.height = "90%";
+    
 const video = document.getElementById("camera");
 var last_frame;
 var resolutions = [[1024, 768], [1280, 720], [1920, 1080], [2560, 1440],[3840, 2160],[5120, 2880]]; 
 var W = 1024;
 var H = 768;
+var drawTimeInterval= null;
+
+
 
 function loadImage()
 {
@@ -145,27 +161,47 @@ function loadImage()
   fileupload.click();
   fileupload.onchange = function (e) {
     console.log(e);
+    var reader = new FileReader();
+    reader.onload = function ()
+    {
+          base_image = new Image();
+          base_image.src = reader.result;
+          base_image.onload = function(){
+            copy = document.getElementById('copy');
+            W = base_image.width*2;
+            H = base_image.height*2;
+            copy.width = W;
+            copy.height = H;
+            ctx = copy.getContext('2d');
+            ctx.drawImage(base_image, 0, 0, W, H);
+            drawFrame();
+          
+      }
+      if (drawTimeInterval)
+        clearInterval(drawTimeInterval);
+    }
+    reader.readAsDataURL(event.srcElement.files[0]);
   }
 }
+
 
 
 var last_update = 0;
 function drawFrame()
 {
-    copy = document.getElementById('copy');
     canvas = document.getElementById('content');
-    copy.width = W;
-    copy.height = H;
     canvas.width = W;
     canvas.height = H;
+    canvas.style.width = "";
+    canvas.style.height = "";
     
-    ctx = copy.getContext('2d');
-    ctx.drawImage(video, 0, 0, W, H);
     canvas_ctx = canvas.getContext('2d');
     if (last_frame)
         canvas_ctx.putImageData(last_frame, 0, 0);
     
-    const frame = ctx.getImageData(0, 0, copy.width, copy.height);
+    copy = document.getElementById('copy');
+    ctx = copy.getContext('2d');
+    const frame = ctx.getImageData(0, 0, W, H);
     const length = frame.data.length;
     let data = frame.data;
     let blocksx = Math.ceil(H/28);
@@ -206,6 +242,18 @@ function drawFrame()
 
 }
 
+function drawFromVideo()
+{
+  copy = document.getElementById('copy');
+  copy.width = W;
+  copy.height = H;
+  copy.style.width = W;
+  copy.style.height = H;
+  ctx = copy.getContext('2d');
+  ctx.drawImage(video, 0, 0, W, H);
+  drawFrame();
+}
+
 function updateResolution()
 {
   let res = resolutions[parseInt(document.getElementById("resolution").value)]
@@ -228,8 +276,9 @@ function startVideo()
     navigator.mediaDevices.getUserMedia({video:{}}).then(
     function(stream){
         video.srcObject = stream
+        updateResolution();
         //video.addEventListener('timeupdate', drawFrame, false);
-        setTimeout(function (){ setInterval(drawFrame, 100)}, 100);
+        setTimeout(function (){ drawTimeInterval=setInterval(drawFromVideo, 100)}, 100);
         video.play()
     })
 }
