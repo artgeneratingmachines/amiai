@@ -175,8 +175,8 @@ function loadImage()
           base_image.src = reader.result;
           base_image.onload = function(){
             copy = document.getElementById('copy');
-            W = base_image.width*2;
-            H = base_image.height*2;
+            W = base_image.width*(last_resolution+1);
+            H = base_image.height*(last_resolution+1);
             copy.width = W;
             copy.height = H;
             ctx = copy.getContext('2d');
@@ -258,6 +258,29 @@ function drawFrame()
 
 }
 
+function drawEmpty(){
+  canvas = document.getElementById('content');
+  canvas.width = W;
+  canvas.height = H;
+  canvas.style.width = "";
+  canvas.style.height = "";
+  ctx = canvas.getContext('2d');
+  const frame = ctx.getImageData(0, 0, W, H);
+  const length = frame.data.length;
+  let data = frame.data;
+  for(i=0;i<H;i++)
+    for(j=0;j<W;j++)
+      { 
+        base = (W*i + j)*4
+        data[base] = 255*(((i + j)%16)<8);
+        data[base+1] = 255*(((i + j)%16)<8);
+        data[base+2] = 255*(((i + j)%16)<8);
+        data[base+3] = 255;
+      }
+   ctx.putImageData(frame, 0, 0);
+}
+
+
 function drawFromVideo()
 {
   copy = document.getElementById('copy');
@@ -283,6 +306,7 @@ function highRes()
   if (last_resolution>=resolutions.length)  
     last_resolution = resolutions.length - 1;
   updateResolution();
+  drawEmpty();
 }
 
 function lowRes()
@@ -291,6 +315,7 @@ function lowRes()
   if (last_resolution < 0)
     last_resolution = 0;
   updateResolution();
+  drawEmpty();
 }
 
 function saveCanvas(){
