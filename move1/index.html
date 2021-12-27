@@ -29,7 +29,6 @@ body {
   box-shadow: 0 0 10px 0 #3498db inset, 0 0 10px 4px #3498db;
   max-width: 90%;
   max-height: 90%;
-  
 }
 
 #copy {
@@ -42,10 +41,12 @@ body {
 
 #controls {
     width: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
 button {
-    width : 30%;
+    width : 18%;
 }
 
 .btn {
@@ -62,7 +63,7 @@ button {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1;
-  margin: 10px;
+  margin: 0.5%;
   padding: 5px 30px;
   height: 40px;
   text-decoration: none;
@@ -98,13 +99,15 @@ h1 {
 
 #resolution {
   width: 88%;
-  margin: 0.5%;
   margin-left: 5%;
 }
 
 #buttons {
-  margin-left:5%;
-  width: 90%;
+  width: 88%;
+  margin:auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #media {
@@ -130,12 +133,16 @@ h1 {
     <video id="camera" autoplay="" muted=""> </video>
 
     <div id="controls">
-     <input type="range" min="0" max="5" value="0" id="resolution" onchange="updateResolution()"><br>
      <input type="file" id="fileupload" style="display: none" accept="image/*"/>
+
+       
      <div id="buttons">
+       <button class="btn animate" onclick="lowRes()">Res-</button>
        <button class="btn animate" onclick="startVideo()">Start</button>
        <button class="btn animate" onclick="loadImage()">Load</button>
        <button class="btn animate" onclick="saveCanvas()">Save</button>
+       <button class="btn animate" onclick="highRes()">Res+</button>
+
      </div>
     <div>
 <div>
@@ -152,7 +159,7 @@ var resolutions = [[1024, 768], [1280, 720], [1920, 1080], [2560, 1440],[3840, 2
 var W = 1024;
 var H = 768;
 var drawTimeInterval= null;
-
+var last_resolution = 0;
 
 
 function loadImage()
@@ -206,6 +213,15 @@ function drawFrame()
     let data = frame.data;
     let blocksx = Math.ceil(H/28);
     let blocksy = Math.ceil(W/28);
+    let max = 0;
+    
+    /* 
+    for (let i=0;i<data.length;i++)
+     if (max < data[i])
+        max =data[i];
+    console.log(max);
+    // Normalization should work
+    */
     for(let i=0;i<blocksx;i++)
         for(let j=0;j<blocksy;j++)
         {
@@ -230,9 +246,9 @@ function drawFrame()
                 {
                 let base = ((basex+offsetx)*W + (basey+offsety))*4;  
                 let intensity = digit_image[offsetx][offsety]*0.9 + idx * 0.1;
-                data[base]  =  intensity ;
-                data[base+1] = intensity ;
-                data[base+2] = intensity ;
+                data[base]  =  intensity * 0.1;
+                data[base+1] = intensity * 1;
+                data[base+2] = intensity * 0.6;
                 }
         }
 
@@ -256,9 +272,25 @@ function drawFromVideo()
 
 function updateResolution()
 {
-  let res = resolutions[parseInt(document.getElementById("resolution").value)]
+  let res = resolutions[last_resolution]
   W = res[0];
   H = res[1];
+}
+
+function highRes()
+{
+  last_resolution += 1;
+  if (last_resolution>=resolutions.length)  
+    last_resolution = resolutions.length - 1;
+  updateResolution();
+}
+
+function lowRes()
+{
+  last_resolution -= 1;
+  if (last_resolution < 0)
+    last_resolution = 0;
+  updateResolution();
 }
 
 function saveCanvas(){
