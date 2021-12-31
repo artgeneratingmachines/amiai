@@ -8,6 +8,8 @@ Created on Wed Nov 24 10:16:13 2021
 import numpy as np
 import tqdm
 import json
+import cv2
+from PIL import Image
 
 from tensorflow.keras.datasets import mnist
 data = mnist.load_data()
@@ -20,8 +22,6 @@ mapper = data[indices]
 
 
 
-import cv2
-from PIL import Image
 
 path = 'amiai.mp4'
 cap = cv2.VideoCapture(path)
