@@ -29,7 +29,7 @@ body {
   box-shadow: 0 0 10px 0 #3498db inset, 0 0 10px 4px #3498db;
   max-width: 90%;
   max-height: 90%;
-  height : 90%;
+  height : 86%;
 }
 
 #copy {
@@ -118,7 +118,7 @@ h1 {
   justify-content: center;
   padding : 2px;
   max-height: 90%;
-  height: 80%;
+  height: 90%;
 }
 
 </style>
@@ -143,10 +143,13 @@ h1 {
        <button class="btn animate" onclick="loadImage()">Load</button>
        <button class="btn animate" onclick="saveCanvas()">Save</button>
        <button class="btn animate" onclick="highRes()">Res+</button>
-
+       <button class="btn animate" onclick="window.location.href='/about.html'">?</button>
      </div>
+     
     <div>
+    
 <div>
+<a href='/about.html' style="color:black;">?</a>
 </body>
 
 <script>
@@ -161,7 +164,7 @@ var W = 1024;
 var H = 768;
 var drawTimeInterval= null;
 var last_resolution = 0;
-
+var last_update = 0;
 
 function loadImage()
 {
@@ -194,7 +197,7 @@ function loadImage()
 
 
 
-var last_update = 0;
+
 function drawFrame()
 {
     canvas = document.getElementById('content');
@@ -307,7 +310,10 @@ function highRes()
   if (last_resolution>=resolutions.length)  
     last_resolution = resolutions.length - 1;
   updateResolution();
-  drawEmpty();
+  if (!last_frame)
+    drawEmpty();
+  else
+    drawFrame();
 }
 
 function lowRes()
@@ -316,7 +322,10 @@ function lowRes()
   if (last_resolution < 0)
     last_resolution = 0;
   updateResolution();
-  drawEmpty();
+  if (!last_frame)
+    drawEmpty();
+  else
+    drawFrame();
 }
 
 function saveCanvas(){
