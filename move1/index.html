@@ -169,6 +169,7 @@ var last_update = 0;
 function loadImage()
 {
   var fileupload = document.getElementById("fileupload");
+  fileupload.onclick = function () { this.value = null; };
   fileupload.click();
   fileupload.onchange = function (e) {
     console.log(e);
